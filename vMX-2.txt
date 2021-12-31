@@ -1,0 +1,50 @@
+
+set version 14.1R1.10
+set system host-name vMX-2
+set system root-authentication encrypted-password "$1$iiqdh9ru$CBQygri2MkpfgtgdGo8GO1"
+set system login user lab uid 2000
+set system login user lab class super-user
+set system login user lab authentication encrypted-password "$1$oW1NeMUu$N7IVMfy8GfJ02jzQzJ39h/"
+set system services ssh
+set system services telnet connection-limit 5
+set system syslog user * any emergency
+set system syslog file messages any notice
+set system syslog file messages authorization info
+set system syslog file interactive-commands interactive-commands any
+set interfaces ge-0/0/0 unit 0 family inet address 10.0.0.2/30
+set interfaces ge-0/0/0 unit 0 family inet6 address 2001:db8::2/126
+set interfaces ge-0/0/1 mac 00:05:86:71:5f:00
+set interfaces ge-0/0/1 unit 0 family inet address 10.0.0.13/30
+set interfaces ge-0/0/1 unit 0 family inet6 address 2001:db8::d/126
+set interfaces lo0 unit 0 family inet filter input-list TSHOOT-OSPF
+deactivate interfaces lo0 unit 0 family inet filter
+set interfaces lo0 unit 0 family inet address 10.2.2.2/32
+set interfaces lo0 unit 0 family inet6 address 2001:db8:cafe::2/128
+set forwarding-options sampling input rate 5
+set forwarding-options sampling input run-length 5
+set forwarding-options sampling input max-packets-per-second 20
+set forwarding-options sampling family inet output file filename sample_file
+set forwarding-options sampling family inet output file files 5
+set forwarding-options sampling family inet output file size 10m
+set forwarding-options sampling family inet output file world-readable
+set forwarding-options sampling family inet output file stamp
+set routing-options router-id 10.2.2.2
+set protocols ospf export OSPF-DIRECT-AND-STATIC
+set protocols ospf area 0.0.0.0 interface ge-0/0/0.0 interface-type p2p
+set protocols ospf area 0.0.0.0 interface ge-0/0/1.0 interface-type p2p
+set protocols ospf area 0.0.0.0 interface lo0.0 passive
+set protocols ospf3 export OSPF-DIRECT-AND-STATIC
+set protocols ospf3 area 0.0.0.0 interface ge-0/0/0.0 interface-type p2p
+set protocols ospf3 area 0.0.0.0 interface ge-0/0/1.0 interface-type p2p
+set protocols ospf3 area 0.0.0.0 interface lo0.0 passive
+set policy-options policy-statement OSPF-DIRECT-AND-STATIC term accept-direct from protocol direct
+set policy-options policy-statement OSPF-DIRECT-AND-STATIC term accept-direct then accept
+set policy-options policy-statement OSPF-DIRECT-AND-STATIC term accept-static from protocol static
+set policy-options policy-statement OSPF-DIRECT-AND-STATIC term accept-static then accept
+set firewall filter TSHOOT-OSPF term 1 from protocol ospf
+set firewall filter TSHOOT-OSPF term 1 then count ospf_tshoot
+set firewall filter TSHOOT-OSPF term 1 then sample
+set firewall filter TSHOOT-OSPF term 1 then accept
+set firewall filter TSHOOT-OSPF term 10 then accept
+
+

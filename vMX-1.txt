@@ -1,0 +1,68 @@
+set version 14.1R1.10
+set system host-name vMX-1
+set system authentication-order password
+set system authentication-order tacplus
+set system root-authentication encrypted-password lab123
+set system login user lab uid 2000
+set system login user lab class super-user
+set system login user lab authentication encrypted-password "$1$oW1NeMUu$N7IVMfy8GfJ02jzQzJ39h/"
+set system login user teste uid 2010
+set system login user teste class super-user
+set system login user teste authentication encrypted-password teste
+set system services ssh
+set system services telnet connection-limit 5
+set system syslog user * any emergency
+set system syslog file messages any notice
+set system syslog file messages authorization info
+set system syslog file interactive-commands interactive-commands any
+deactivate system syslog
+set interfaces ge-0/0/0 unit 0 family inet address 10.0.0.1/30
+set interfaces ge-0/0/0 unit 0 family inet6 address 2001:db8::1/126
+set interfaces ge-0/0/1 unit 0 family inet address 10.0.0.5/30
+set interfaces ge-0/0/1 unit 0 family inet6 address 2001:db8::5/126
+set interfaces ge-0/0/2 unit 0 family inet filter input-list FILTER-PFE
+set interfaces ge-0/0/2 unit 0 family inet address 172.16.1.1/24
+set interfaces ge-0/0/3 unit 0 family inet address 172.16.100.1/24
+deactivate interfaces ge-0/0/3
+set interfaces lo0 unit 0 family inet filter input-list PROTECTION
+set interfaces lo0 unit 0 family inet address 10.1.1.1/32
+set interfaces lo0 unit 0 family inet6 address 2001:db8:cafe::1/128
+set snmp description vMX-1
+set snmp location POP-X
+set snmp community teste clients 10.0.0.0/8
+set forwarding-options sampling input rate 5
+set forwarding-options sampling input run-length 5
+set forwarding-options sampling input max-packets-per-second 20
+set forwarding-options sampling family inet output file filename sampling_file
+set forwarding-options sampling family inet output file files 2
+set forwarding-options sampling family inet output file size 10m
+set forwarding-options sampling family inet output file world-readable
+set forwarding-options sampling family inet output file stamp
+set routing-options router-id 10.1.1.1
+set protocols ospf export OSPF-DIRECT-AND-STATIC
+set protocols ospf area 0.0.0.0 interface ge-0/0/0.0 interface-type p2p
+set protocols ospf area 0.0.0.0 interface ge-0/0/1.0 interface-type p2p
+set protocols ospf area 0.0.0.0 interface lo0.0 passive
+set protocols ospf3 export OSPF-DIRECT-AND-STATIC
+set protocols ospf3 area 0.0.0.0 interface ge-0/0/1.0 interface-type p2p
+set protocols ospf3 area 0.0.0.0 interface ge-0/0/0.0 interface-type p2p
+set protocols ospf3 area 0.0.0.0 interface lo0.0 passive
+set policy-options policy-statement OSPF-DIRECT-AND-STATIC term accept-direct from protocol direct
+set policy-options policy-statement OSPF-DIRECT-AND-STATIC term accept-direct then accept
+set policy-options policy-statement OSPF-DIRECT-AND-STATIC term accept-static from protocol static
+set policy-options policy-statement OSPF-DIRECT-AND-STATIC term accept-static then accept
+set firewall filter PROTECTION term 1 from destination-address 10.1.1.1/32
+set firewall filter PROTECTION term 1 from protocol tcp
+set firewall filter PROTECTION term 1 from protocol udp
+set firewall filter PROTECTION term 1 from port 22
+set firewall filter PROTECTION term 1 then count ssh_deny
+set firewall filter PROTECTION term 1 then discard
+set firewall filter PROTECTION term 1000 then accept
+set firewall filter FILTER-PFE term 1 from source-address 172.16.1.0/24
+set firewall filter FILTER-PFE term 1 from destination-address 10.0.0.0/8
+set firewall filter FILTER-PFE term 1 from protocol icmp
+set firewall filter FILTER-PFE term 1 then count deny_icmp
+set firewall filter FILTER-PFE term 1 then sample
+set firewall filter FILTER-PFE term 1 then reject
+set firewall filter FILTER-PFE term 2 then accept
+
